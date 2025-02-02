@@ -17,7 +17,7 @@ spark.conf.set(f"fs.azure.account.key.{storage_account_name}.dfs.core.windows.ne
 gas_df = spark.read.format("delta").load(f"abfss://{container_name}@{storage_account_name}.dfs.core.windows.net/gases/extracted_year=2020")
 met_df = spark.read.format("delta").load(f"abfss://{container_name}@{storage_account_name}.dfs.core.windows.net/met")
 
-combined_df = gas_df
+combined_df = gas_df.union(met_df)
 
 # combined_df = gas_df.union(met_df)
 combined_df.cache()
