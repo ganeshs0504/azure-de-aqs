@@ -66,28 +66,6 @@ combined_df = combined_df.drop("latitude", "longitude")\
 
 # COMMAND ----------
 
-window_spec = Window.partitionBy("state_code", "county_code", "site_num").orderBy(F.desc("count"))
-
-lat_lon_mod_diff = combined_df.groupBy("state_code", "county_code", "site_num", "latitude", "longitude") \
-    .agg(F.count("*").alias("count")) \
-    .withColumn("rank", F.rank().over(window_spec)) \
-        .filter(F.col("rank") == 1)\
-            .drop("count", "rank")
-
-lat_lon_mod_diff.cache()
-lat_lon_mod_diff.count()
-
-combined_df = combined_df.drop("latitude", "longitude")\
-    .join(lat_lon_mod_diff, ["state_code", "county_code", "site_num"], "left")
-
-combined_df = combined_df.orderBy("combined_datetime")
-
-# COMMAND ----------
-
-
-
-# COMMAND ----------
-
 # MAGIC %md
 # MAGIC # Writing to table (Data Warehouse)
 
