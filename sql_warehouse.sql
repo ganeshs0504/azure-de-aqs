@@ -1,31 +1,39 @@
-CREATE DATABASE IF NOT EXISTS aqs_db;
-use aqs_db;
+CREATE SCHEMA IF NOT EXISTS adls_warehouse_catalog.adls_warehouse
+MANAGED LOCATION "abfss://aqs-warehouse@########.dfs.core.windows.net/";
 
-CREATE TABLE IF NOT EXISTS aqs_db.dim_unit(
-    unit_surr_key BIGINT PRIMARY KEY,
+CREATE SCHEMA IF NOT EXISTS adls_gold_layer_catalog.adls_data_marts
+MANAGED LOCATION "abfss://gold@########.dfs.core.windows.net/";
+
+-- CREATE DATABASE IF NOT EXISTS gv_aqs_managed_catalog.aqs_db
+-- MANAGED LOCATION "abfss://aqs-warehouse@########.dfs.core.windows.net/";
+
+use adls_warehouse_catalog.adls_warehouse;
+
+CREATE TABLE IF NOT EXISTS adls_warehouse_catalog.adls_warehouse.dim_unit(
+    unit_surr_key STRING PRIMARY KEY,
     units_of_measure STRING
 )USING DELTA;
 
-CREATE TABLE IF NOT EXISTS aqs_db.dim_uncertainty(
-    uncert_surr_key BIGINT PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS adls_warehouse_catalog.adls_warehouse.dim_uncertainty(
+    uncert_surr_key STRING PRIMARY KEY,
     uncertainty STRING
 )USING DELTA;
 
-CREATE TABLE IF NOT EXISTS aqs_db.dim_parameter(
-    parameter_surr_key BIGINT PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS adls_warehouse_catalog.adls_warehouse.dim_parameter(
+    parameter_surr_key STRING PRIMARY KEY,
     parameter_code INT,
     parameter_name STRING
 )USING DELTA;
 
-CREATE TABLE IF NOT EXISTS aqs_db.dim_method(
-    method_surr_key BIGINT PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS adls_warehouse_catalog.adls_warehouse.dim_method(
+    method_surr_key STRING PRIMARY KEY,
     method_code STRING,
     method_type STRING,
     method_name STRING
 )USING DELTA;
 
-CREATE TABLE IF NOT EXISTS aqs_db.dim_location(
-    location_surr_key BIGINT PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS adls_warehouse_catalog.adls_warehouse.dim_location(
+    location_surr_key STRING PRIMARY KEY,
     state_code INT,
     county_code INT,
     site_num INT,
@@ -35,8 +43,8 @@ CREATE TABLE IF NOT EXISTS aqs_db.dim_location(
     county_name STRING
 )USING DELTA;
 
-CREATE TABLE IF NOT EXISTS aqs_db.dim_datetime(
-    date_surr_key BIGINT PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS adls_warehouse_catalog.adls_warehouse.dim_datetime(
+    date_surr_key STRING PRIMARY KEY,
     combined_datetime TIMESTAMP,
     extracted_date DATE,
     dayOfMonth INT,
@@ -47,22 +55,23 @@ CREATE TABLE IF NOT EXISTS aqs_db.dim_datetime(
     extracted_second INT
 )USING DELTA;
 
-CREATE TABLE IF NOT EXISTS aqs_db.fact_aqs(
-    fact_surr_key BIGINT PRIMARY KEY,
+DROP TABLE IF EXIStS adls_warehouse_catalog.adls_warehouse.fact_aqs;
+
+CREATE TABLE IF NOT EXISTS adls_warehouse_catalog.adls_warehouse.fact_aqs(
+    fact_surr_key STRING PRIMARY KEY,
     sample_measurement FLOAT,
-    unit_surr_key BIGINT REFERENCES aqs_db.dim_unit(unit_surr_key),
-    uncert_surr_key BIGINT REFERENCES aqs_db.dim_uncertainty(uncert_surr_key),
-    parameter_surr_key BIGINT REFERENCES aqs_db.dim_parameter(parameter_surr_key),
-    method_surr_key BIGINT REFERENCES aqs_db.dim_method(method_surr_key),
-    location_surr_key BIGINT REFERENCES aqs_db.dim_location(location_surr_key),
-    date_surr_key BIGINT REFERENCES aqs_db.dim_datetime(date_surr_key)
+    unit_surr_key STRING REFERENCES adls_warehouse_catalog.adls_warehouse.dim_unit(unit_surr_key),
+    uncert_surr_key STRING REFERENCES adls_warehouse_catalog.adls_warehouse.dim_uncertainty(uncert_surr_key),
+    parameter_surr_key STRING REFERENCES adls_warehouse_catalog.adls_warehouse.dim_parameter(parameter_surr_key),
+    method_surr_key STRING REFERENCES adls_warehouse_catalog.adls_warehouse.dim_method(method_surr_key),
+    location_surr_key STRING REFERENCES adls_warehouse_catalog.adls_warehouse.dim_location(location_surr_key),
+    date_surr_key STRING REFERENCES adls_warehouse_catalog.adls_warehouse.dim_datetime(date_surr_key)
 )USING DELTA
 PARTITIONED BY (date_surr_key);
 
--- drop table aqs_db.dim_datetime;
--- drop table aqs_db.dim_location;
--- drop table aqs_db.dim_method;
--- drop table aqs_db.dim_parameter;
--- drop table aqs_db.dim_uncertainty;
--- drop table aqs_db.dim_unit;
--- drop table aqs_db.fact_aqs;
+-- drop table adls_warehouse_catalog.adls_warehouse.dim_datetime;
+-- drop table adls_warehouse_catalog.adls_warehouse.dim_location;
+-- drop table adls_warehouse_catalog.adls_warehouse.dim_method;
+-- drop table adls_warehouse_catalog.adls_warehouse.dim_parameter;
+-- drop table adls_warehouse_catalog.adls_warehouse.dim_uncertainty;
+-- drop table adls_warehouse_catalog.adls_warehouse.dim_unit;
